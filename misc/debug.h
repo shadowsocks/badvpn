@@ -95,6 +95,11 @@
 #include <stdint.h>
 #include <assert.h>
 
+#ifdef __ANDROID__
+#include <android/log.h>
+#endif
+
+#ifndef __ANDROID__
 #define DEBUG(...) \
     { \
         fprintf(stderr, "%s: ", __FUNCTION__); \
@@ -109,6 +114,22 @@
             abort(); \
         } \
     }
+#else
+#define DEBUG(...) \
+    { \
+        __android_log_print(ANDROID_LOG_ERROR, "tun2socks", "%s: ", __FUNCTION__); \
+        __android_log_print(ANDROID_LOG_ERROR, "tun2socks", __VA_ARGS__); \
+        __android_log_print(ANDROID_LOG_ERROR, "tun2socks", "\n"); \
+    }
+
+#define ASSERT_FORCE(e) \
+    { \
+        if (!(e)) { \
+            __android_log_print(ANDROID_LOG_FATAL, "tun2socks", "%s:%d Assertion failed\n", __FILE__, __LINE__); \
+            abort(); \
+        } \
+    }
+#endif
 
 #ifdef NDEBUG
     #define DEBUG_ZERO_MEMORY(buf, len) {}
