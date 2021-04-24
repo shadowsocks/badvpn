@@ -1429,8 +1429,29 @@ int process_device_udp_packet (uint8_t *data, int data_len)
     switch (ip_version) {
         case 4: {
             // ignore non-UDP packets
-            if (data_len < sizeof(struct ipv4_header) || data[offsetof(struct ipv4_header, protocol)] != IPV4_PROTOCOL_UDP) {
+            if (data_len < sizeof(struct ipv4_header)) {
                 goto fail;
+            }
+            switch (data[offsetof(struct ipv4_header, protocol)]) {
+                case IPV4_PROTOCOL_UDP: break;
+                case 1: { // ICMP
+                    if (data[0] == 69 && data_len >= 28 && data[20] == 8 && data[21] == 0) { // PING
+                        uint32_t ip_src = 0;
+                        memcpy(&ip_src, &data[12], 4);
+                        memcpy(&data[12], &data[16], 4);
+                        memcpy(&data[16], &ip_src, 4);
+                        uint16_t ip_sum = 0;
+                        memcpy(&data[10], &ip_sum, 2);
+                        ip_sum = ipv4_checksum(data, NULL, 0);
+                        memcpy(&data[10], &ip_sum, 2);
+                        data[20] = 0; // response
+                        data[22] += 8; // checksum
+                        if (data[22] < 8) data[23] += 1;
+                        BTap_Send(&device, data, data_len);
+                    }
+                    return 1;
+                }
+                default: goto fail;
             }
 
             // parse IPv4 header
