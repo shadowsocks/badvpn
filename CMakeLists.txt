@@ -9,10 +9,10 @@ if(ANDROID)
     set(CMAKE_C_FLAGS  "${CMAKE_C_FLAGS} -Wall -Wextra -std=gnu99")
     include_directories(${LIB_ANCILLARY_DIR})
 
-    add_definitions(-DBADVPN_THREADWORK_USE_PTHREAD)
-    add_definitions(-DBADVPN_LINUX -DBADVPN_BREACTOR_BADVPN -D_GNU_SOURCE -DANDROID -D__ANDROID__)
-    add_definitions(-DBADVPN_USE_SELFPIPE -DBADVPN_USE_EPOLL)
+    add_definitions(-DBADVPN_THREADWORK_USE_PTHREAD -DBADVPN_LINUX -DBADVPN_BREACTOR_BADVPN -D_GNU_SOURCE)
+    add_definitions(-DBADVPN_USE_SIGNALFD -DBADVPN_USE_EPOLL)
     add_definitions(-DBADVPN_LITTLE_ENDIAN -DBADVPN_THREAD_SAFE)
+    add_definitions(-DNDEBUG -DANDROID -D__ANDROID__)
 endif()
 
 set(CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/cmake/modules")
