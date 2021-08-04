@@ -2,7 +2,7 @@ if(ANDROID)
 
     include_directories(${LIB_ANCILLARY_DIR})
     add_executable(tun2socks tun2socks.c SocksUdpGwClient.c)
-    target_link_libraries(tun2socks base system flow tuntap lwip socksclient udpgw_client ancillary log)
+    target_link_libraries(tun2socks base system flow tuntap lwip socksclient udpgw_client ancillary dl log)
     set_target_properties(tun2socks PROPERTIES PREFIX "lib" SUFFIX ".so")
 
 else()
