@@ -12,7 +12,7 @@ if(ANDROID)
     add_definitions(-DBADVPN_THREADWORK_USE_PTHREAD -DBADVPN_LINUX -DBADVPN_BREACTOR_BADVPN -D_GNU_SOURCE)
     add_definitions(-DBADVPN_USE_SIGNALFD -DBADVPN_USE_EPOLL)
     add_definitions(-DBADVPN_LITTLE_ENDIAN -DBADVPN_THREAD_SAFE)
-    add_definitions(-DNDEBUG -DANDROID -D__ANDROID__)
+    add_definitions(-DNDEBUG)
 endif()
 
 set(CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/cmake/modules")
