@@ -163,7 +163,7 @@ static SocksUdpGwClient_connection * find_connection (SocksUdpGwClient *o, Socks
     }
 
     SocksUdpGwClient_connection *con = UPPER_OBJECT(tree_node, SocksUdpGwClient_connection, connections_tree_node);
-    if (!con && con->is_dns != is_dns) {
+    if (!con || con->is_dns != is_dns) {
         return NULL;
     }
 
