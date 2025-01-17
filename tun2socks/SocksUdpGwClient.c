@@ -36,7 +36,7 @@
 #ifdef __ANDROID__
 
 #include <misc/socks_proto.h>
-#define CONNECTION_UDP_BUFFER_SIZE 8
+#define CONNECTION_UDP_BUFFER_SIZE 64
 
 #else
 
@@ -404,7 +404,10 @@ static void try_connect (SocksUdpGwClient *o)
     ASSERT(!BTimer_IsRunning(&o->reconnect_timer))
 
     // init SOCKS client
-    if (!BSocksClient_Init(&o->socks_client, o->socks_server_addr, o->auth_info, o->num_auth_info, o->remote_udpgw_addr, (BSocksClient_handler)socks_client_handler, o, o->reactor)) {
+    if (!BSocksClient_Init(&o->socks_client, o->socks_server_addr,
+        o->auth_info, o->num_auth_info, o->remote_udpgw_addr, /*udp=*/false,
+        (BSocksClient_handler)socks_client_handler, o, o->reactor))
+    {
         BLog(BLOG_ERROR, "BSocksClient_Init failed");
         goto fail0;
     }
@@ -471,8 +474,6 @@ static void socks_client_handler (SocksUdpGwClient *o, int event)
             // set reconnect timer
             BReactor_SetTimer(o->reactor, &o->reconnect_timer);
         } break;
-
-        default: ASSERT(0);
     }
 }
 
@@ -616,26 +617,19 @@ void SocksUdpGwClient_SubmitPacket (SocksUdpGwClient *o, BAddr local_addr, BAddr
     if (!con) {
         // create new connection
         con = connection_init(o, conaddr, data, data_len, is_dns);
-
     } else {
         // reset the connection
         reset_connection(o, con, conaddr, is_dns);
 
         // send packet to existing connection
         int res = connection_send(con, data, data_len);
+
         if (res == 1) {
-            BLog(BLOG_ERROR, "The current UDP connection is broken, recreating a new one");
-
-            // free broken connection
-            connection_free(con);
-
-            // create new connection
-            con = connection_init(o, conaddr, data, data_len, is_dns);
+            // drop the packet if out of buffer
+            BLog(BLOG_ERROR, "Drop the packet as the buffer is full");
         } else {
-            // remove connection from list
-            LinkedList1_Remove(&o->connections_list, &con->connections_list_node);
-
             // move connection to front of the list
+            LinkedList1_Remove(&o->connections_list, &con->connections_list_node);
             LinkedList1_Append(&o->connections_list, &con->connections_list_node);
         }
     }

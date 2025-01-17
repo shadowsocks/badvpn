@@ -33,21 +33,14 @@
 
 #include <misc/bsize.h>
 #include <misc/packed.h>
+#ifdef __ANDROID__
+#include <misc/socks_proto.h>
+#endif
 
 #define UDPGW_CLIENT_FLAG_KEEPALIVE (1 << 0)
 #define UDPGW_CLIENT_FLAG_REBIND (1 << 1)
 #define UDPGW_CLIENT_FLAG_DNS (1 << 2)
 #define UDPGW_CLIENT_FLAG_IPV6 (1 << 3)
-
-#ifdef __ANDROID__
-B_START_PACKED
-struct socks_udp_header {
-    uint16_t rsv;
-    uint8_t frag;
-    uint8_t atyp;
-} B_PACKED;
-B_END_PACKED
-#endif
 
 B_START_PACKED
 struct udpgw_header {
